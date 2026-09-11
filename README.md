@@ -28,7 +28,7 @@ Due to the ownership transfer, new licenses are not available at the moment.
 First configure a secret in the `config.php` file:
 
 ```php
-'mauricerenck.contentcalendar' => [
+'mauricerenck.content-calendar' => [
     'secret' => 'YOUR-SECRET',
 ],
 ```
@@ -36,7 +36,7 @@ First configure a secret in the `config.php` file:
 Then set your timezone:
 
 ```php
-'mauricerenck.contentcalendar' => [
+'mauricerenck.content-calendar' => [
     'secret' => 'YOUR-SECRET',
     'timezone' => 'Europe/Berlin',
 ],
@@ -45,7 +45,7 @@ Then set your timezone:
 Tell the plugin which pages contain your posts:
 
 ```php
-'mauricerenck.contentcalendar' => [
+'mauricerenck.content-calendar' => [
     'secret' => 'YOUR-SECRET',
     'timezone' => 'Europe/Berlin',
     'pages' => [
@@ -58,7 +58,7 @@ Tell the plugin which pages contain your posts:
 You can also use collections as a source:
 
 ```php
-'mauricerenck.contentcalendar' => [
+'mauricerenck.content-calendar' => [
     'secret' => 'YOUR-SECRET',
     'timezone' => 'Europe/Berlin',
     'collections' => [
@@ -72,7 +72,7 @@ Then subscribe to the calendar URL: `https://yourdomain.com/YOUR-SECRET/calendar
 
 ## Options
 
-Please prefix every option with `mauricerenck.contentcalendar.`.
+Please prefix every option with `mauricerenck.content-calendar.`.
 
 | Option             | Default           | Description                                                  |
 | ------------------ | ----------------- | ------------------------------------------------------------ |
