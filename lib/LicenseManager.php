@@ -7,14 +7,12 @@ use Kirby\Http\Remote;
 class LicenseManager
 {
     private string $licenseKey;
-    private int $lemonSqueezyStoreId;
-    private int $lemonSqueezyProductId;
+    private int $digistoreProductId;
 
     public function __construct(private string $instanceId)
     {
         $this->licenseKey = option("mauricerenck.content-calendar.licenseKey", null);
-        $this->lemonSqueezyStoreId = 189910;
-        $this->lemonSqueezyProductId = 557759;
+        $this->digistoreProductId = 733924;
     }
 
     public function isActivated()
@@ -30,17 +28,17 @@ class LicenseManager
             return $apiCacheData === 'FULL_PLAN';
         }
 
-        $licenseValidationResponse = Remote::post('https://api.lemonsqueezy.com/v1/licenses/validate', [
+        $licenseValidationResponse = Remote::post('https://licenses.mauricerenck.de/validate', [
             'data' => [
-                'license_key' => $this->licenseKey,
-                'instance_id' => null,
+                'key' => $this->licenseKey,
+                'productId' => $this->digistoreProductId,
             ],
             'headers' => [
                 'Accept' => 'application/json',
             ],
         ]);
 
-        if ($licenseValidationResponse->code() === 500) {
+        if ($licenseValidationResponse->code() >= 500) {
             return false;
         }
 
@@ -50,57 +48,17 @@ class LicenseManager
         }
 
         $apiData = $licenseValidationResponse->json();
-        $licenseStatus = isset($apiData['license_key']['status'])
-            ? $apiData['license_key']['status']
-            : null;
+        $licenseValid = isset($apiData['valid'])
+            ? $apiData['valid']
+            : false;
 
-        if ($licenseStatus === null || $licenseStatus === 'disabled' || $licenseStatus === 'expired') {
+        if ($licenseValid === null || $licenseValid === false) {
             $apiCache->set('license', 'FREE_PLAN', 1440); // cache is set in minutes => 24 hours
             return false;
         }
 
-        if ($licenseStatus === 'inactive') {
-            $licenseActivationResponse = Remote::post('https://api.lemonsqueezy.com/v1/licenses/activate', [
-                'data' => [
-                    'license_key' => $this->licenseKey,
-                    'instance_name' => $this->instanceId,
-                ],
-                'headers' => [
-                    'Accept' => 'application/json',
-                ],
-            ]);
+        $apiCache->set('license', 'FULL_PLAN', 1440); // cache is set in minutes => 24 hours
 
-            if ($licenseActivationResponse->code() === 500) {
-                return false;
-            }
-
-
-            if ($licenseActivationResponse->code() !== 200) {
-                $apiCache->set('license', 'FREE_PLAN', 1440); // cache is set in minutes => 24 hours
-                return false;
-            }
-
-            $licenseActivationData = $licenseActivationResponse->json();
-
-            if (!isset($licenseActivationData['activated']) || $licenseActivationData['activated'] === false) {
-                $apiCache->set('license', 'FREE_PLAN', 1440); // cache is set in minutes => 24 hours
-                return false;
-            }
-
-            // we will treat a successful activation response as validation response
-            // and proceed with the check of store and product id
-            $apiData = $licenseActivationData;
-        }
-
-        $storeId    = isset($apiData['meta']['store_id']) ? $apiData['meta']['store_id'] : null;
-        $productId  = isset($apiData['meta']['product_id']) ? $apiData['meta']['product_id'] : null;
-
-        $licencePlan = $productId === $this->lemonSqueezyProductId && $storeId === $this->lemonSqueezyStoreId
-            ? 'FULL_PLAN'
-            : 'FREE_PLAN';
-
-        $apiCache->set('license', $licencePlan, 1440); // cache is set in minutes => 24 hours
-
-        return $licencePlan === 'FULL_PLAN';
+        return true;
     }
 }
