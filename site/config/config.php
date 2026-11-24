@@ -5,7 +5,7 @@ return [
     'api' => [
         'basicAuth' => true,
     ],
-    'konzentrik.calendarview' => [
+    'mauricerenck.content-calendar' => [
         'licenseKey' => 'MY-KEY',
         'secret' => 'YOUR_SECRET_KEY',
         'pages' => [
